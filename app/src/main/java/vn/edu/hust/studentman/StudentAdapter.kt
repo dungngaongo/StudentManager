@@ -1,42 +1,62 @@
 package vn.edu.hust.studentman
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import vn.edu.hust.studentman.R
+import vn.edu.hust.studentman.StudentModel
 
 class StudentAdapter(
-  private val students: MutableList<StudentModel>,
-  private val onEditClicked: (StudentModel, Int) -> Unit
-): RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
-  class StudentViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-    val textStudentName: TextView = itemView.findViewById(R.id.text_student_name)
-    val textStudentId: TextView = itemView.findViewById(R.id.text_student_id)
-    val imageEdit: ImageView = itemView.findViewById(R.id.image_edit)
-    val imageRemove: ImageView = itemView.findViewById(R.id.image_remove)
+  private val context: Context,
+  private val students: List<StudentModel>,
+  private val onEditClick: (StudentModel) -> Unit,
+  private val onRemoveClick: (StudentModel) -> Unit
+) : BaseAdapter() {
+
+  override fun getCount(): Int {
+    return students.size
   }
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
-    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.layout_student_item,
-       parent, false)
-    return StudentViewHolder(itemView)
+  override fun getItem(position: Int): Any {
+    return students[position]
   }
 
-  override fun getItemCount(): Int = students.size
+  override fun getItemId(position: Int): Long {
+    return position.toLong()
+  }
 
-  override fun onBindViewHolder(holder: StudentViewHolder, position: Int) {
+  override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+    val view: View
+    val holder: ViewHolder
+
+    if (convertView == null) {
+      val inflater = LayoutInflater.from(context)
+      view = inflater.inflate(R.layout.layout_student_item, parent, false)
+
+      holder = ViewHolder()
+      holder.nameTextView = view.findViewById(R.id.text_student_name)
+      holder.idTextView = view.findViewById(R.id.text_student_id)
+
+      view.tag = holder
+    } else {
+      view = convertView
+      holder = view.tag as ViewHolder
+    }
+
     val student = students[position]
+    holder.nameTextView.text = student.studentName
+    holder.idTextView.text = student.studentId
 
-    holder.textStudentName.text = student.studentName
-    holder.textStudentId.text = student.studentId
+    return view
+  }
 
-    holder.imageEdit.setOnClickListener {
-      onEditClicked(student, position)
-    }
-    holder.imageRemove.setOnClickListener {
-      (holder.itemView.context as MainActivity).showDeleteConfirmationDialog(student, position, this)
-    }
+  private class ViewHolder {
+    lateinit var nameTextView: TextView
+    lateinit var idTextView: TextView
   }
 }
